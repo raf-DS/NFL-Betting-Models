@@ -3,9 +3,11 @@
   {
    "cell_type": "markdown",
    "id": "e0c77669",
-   "metadata": {},
+   "metadata": {
+    "heading_collapsed": true
+   },
    "source": [
-    "## imports & general functions"
+    "## imports, general functions, save/read-in data"
    ]
   },
   {
@@ -15,7 +17,8 @@
    "metadata": {
     "code_folding": [
      1
-    ]
+    ],
+    "hidden": true
    },
    "outputs": [],
    "source": [
@@ -25,12 +28,13 @@
     "    import numpy as np\n",
     "    import matplotlib.pyplot as plt\n",
     "    from simple_colors import * # for printing in red when debugging\n",
-    "    import nfl_data_py as nfl\n",
+    "    import nfl_data_py as nfl #\n",
+    "\n",
     "    # import itertools # \n",
     "    # from difflib import SequenceMatcher # string similarity\n",
     "    # import string # for \n",
     "    # from nba_api.stats.endpoints import playbyplayv2, scoreboard\n",
-    "#     import requests\n",
+    "    # import requests\n",
     "    import warnings\n",
     "    import os\n",
     "    \n",
@@ -46,7 +50,8 @@
      0,
      7,
      17
-    ]
+    ],
+    "hidden": true
    },
    "outputs": [],
    "source": [
@@ -72,592 +77,155 @@
    ]
   },
   {
+   "cell_type": "code",
+   "execution_count": 45,
+   "id": "79ee793c",
+   "metadata": {
+    "code_folding": [
+     7,
+     34
+    ],
+    "deletable": false,
+    "editable": false,
+    "hidden": true,
+    "run_control": {
+     "frozen": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# def read_and_save_data():\n",
+    "def read_and_save_data():\n",
+    "    create_save_dfs()\n",
+    "    \n",
+    "# def create_save_dfs():\n",
+    "# input : N/A, just one time run to import in data\n",
+    "# output : N/A, read in data from nfl.import functions and save to appropriate folders\n",
+    "def create_save_dfs():\n",
+    "    warnings.filterwarnings('ignore')   \n",
+    "    # prepare years to loop through\n",
+    "    ystart = 2000 ; yend = 2024\n",
+    "    years = np.linspace(ystart,yend, yend-ystart+1, dtype = int)\n",
+    "\n",
+    "    sp = r\"C:\\Users\\Rafal Adamczyk\\Documents\\portfolio projects\\(2)_NFL\"\n",
+    "    # loop through recent years and save to dataframe\n",
+    "    for y in years:\n",
+    "        # run nfl.import functions for relevant data\n",
+    "        try : \n",
+    "            # create savepath to specific year\n",
+    "            savepath = sp + \"\\\\\" + str(y)\n",
+    "            # get relevant data\n",
+    "            yearly_dfs[ f\"data_{y}\" ] = {f\"pbp_{y}\" : nfl.import_pbp_data([y]),\n",
+    "                                         f\"players_{y}\" : nfl.import_rosters([y]),\n",
+    "                                         f\"teams_{y}\" : nfl.import_team_desc() } \n",
+    "            # save to folder to read in quicker rather than importing\n",
+    "            save_to_path(yearly_dfs[ f\"data_{y}\" ], savepath)\n",
+    "            print(f'Data from {y} saved.')\n",
+    "        except Exception as e: print(f'Error in create_save_dfs() ; {e}')\n",
+    "    warnings.filterwarnings('default')\n",
+    "    \n",
+    "# def save_to_paxth(dict_y, savepath):\n",
+    "# input dict_y : (dict) dict of relvant dfs for appropriate year ; yearly_dfs[ f\"data_{y}\" ] in create_save_dfs()\n",
+    "# input savepath : (str) path to folder to create yearly NFL folders and save data\n",
+    "# output : N/A, just save dataframes to file directory\n",
+    "def save_to_path(dict_y, savepath):\n",
+    "    # check if path exists and is a directory (folder)\n",
+    "    e = os.path.exists(savepath)\n",
+    "    f = os.path.isdir(savepath)\n",
+    "    # if folder already exists, save in relevant dataframes\n",
+    "    if (e) & (f):\n",
+    "        folder = savepath + \"\\\\\"\n",
+    "        for key,val in dict_y.items() :\n",
+    "            val.to_csv(folder + key + \".csv\")                \n",
+    "    # if proper folders don't exist, create them and rerun function to save dfs in there\n",
+    "    else :\n",
+    "        os.makedirs(savepath)\n",
+    "        return save_to_path(exdf, savepath)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "66e28750",
+   "metadata": {
+    "deletable": false,
+    "editable": false,
+    "hidden": true,
+    "run_control": {
+     "frozen": true
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2000 done.\n",
+      "Downcasting floats.\n",
+      "Data from 2000 saved.\n",
+      "2001 done.\n",
+      "Downcasting floats.\n",
+      "Data from 2001 saved.\n",
+      "2002 done.\n",
+      "Downcasting floats.\n",
+      "Data from 2002 saved.\n",
+      "2003 done.\n",
+      "Downcasting floats.\n",
+      "Data from 2003 saved.\n",
+      "2004 done.\n",
+      "Downcasting floats.\n",
+      "Data from 2004 saved.\n",
+      "2005 done.\n",
+      "Downcasting floats.\n",
+      "Data from 2005 saved.\n",
+      "2006 done.\n",
+      "Downcasting floats.\n",
+      "Data from 2006 saved.\n"
+     ]
+    }
+   ],
+   "source": [
+    "read_and_save_data()"
+   ]
+  },
+  {
    "cell_type": "markdown",
-   "id": "bb01ddeb",
-   "metadata": {
-    "heading_collapsed": true
-   },
+   "id": "3d58b028",
+   "metadata": {},
    "source": [
-    "## gather data (nfl)"
+    "## beginning analyses"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "e496e93d",
-   "metadata": {
-    "code_folding": [
-     0
-    ],
-    "deletable": false,
-    "editable": false,
-    "hidden": true,
-    "run_control": {
-     "frozen": true
-    }
-   },
-   "outputs": [],
-   "source": [
-    "# chatgpt attempt 1\n",
-    "import requests\n",
-    "from bs4 import BeautifulSoup\n",
-    "import csv\n",
-    "\n",
-    "url_base = \"https://www.pro-football-reference.com/years/\"\n",
-    "\n",
-    "# specify the year range you want to scrape data from\n",
-    "start_year = 2011\n",
-    "end_year = 2021\n",
-    "\n",
-    "# loop through all the years you want to scrape data from\n",
-    "for year in range(start_year, end_year+1):\n",
-    "\n",
-    "    # create the URL for the current year's play-by-play data page\n",
-    "    url = url_base + str(year) + \"/games.htm\"\n",
-    "\n",
-    "    # send a request to the URL and get the HTML response\n",
-    "    response = requests.get(url)\n",
-    "    html = response.content\n",
-    "\n",
-    "    # parse the HTML using BeautifulSoup\n",
-    "    soup = BeautifulSoup(html, \"html.parser\")\n",
-    "\n",
-    "    # find the table that contains the play-by-play data\n",
-    "    table = soup.find(\"table\", {\"id\": \"games\"})\n",
-    "\n",
-    "    # extract the data from the table and write it to a CSV file\n",
-    "    with open(\"nfl_play_by_play_data_\" + str(year) + \".csv\", \"w\", newline=\"\") as f:\n",
-    "        writer = csv.writer(f)\n",
-    "        for row in table.find_all(\"tr\"):\n",
-    "            # extract the data from each row of the table\n",
-    "            data = [td.get_text() for td in row.find_all(\"td\")]\n",
-    "            writer.writerow(data)\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "861a8752",
-   "metadata": {
-    "code_folding": [
-     0
-    ],
-    "deletable": false,
-    "editable": false,
-    "hidden": true,
-    "run_control": {
-     "frozen": true
-    }
-   },
-   "outputs": [],
-   "source": [
-    "# chatgpt attempt 2\n",
-    "import requests\n",
-    "from bs4 import BeautifulSoup\n",
-    "import csv\n",
-    "\n",
-    "url_base = \"https://www.pro-football-reference.com\"\n",
-    "\n",
-    "# specify the year range you want to scrape data from\n",
-    "start_year = 2011\n",
-    "end_year = 2021\n",
-    "\n",
-    "# loop through all the years you want to scrape data from\n",
-    "for year in range(start_year, end_year+1):\n",
-    "\n",
-    "    # create the URL for the current year's play-by-play data page\n",
-    "    url = url_base + \"/years/\" + str(year) + \"/\"\n",
-    "\n",
-    "    # send a request to the URL and get the HTML response\n",
-    "    response = requests.get(url)\n",
-    "    html = response.content\n",
-    "\n",
-    "    # parse the HTML using BeautifulSoup\n",
-    "    soup = BeautifulSoup(html, \"html.parser\")\n",
-    "\n",
-    "    # find the table that contains the links to each game's play-by-play page\n",
-    "    table = soup.find(\"table\", {\"id\": \"games\"})\n",
-    "\n",
-    "    # loop through each row of the table\n",
-    "    for row in table.find_all(\"tr\"):\n",
-    "\n",
-    "        # extract the link to the play-by-play page for the current game\n",
-    "        link = row.find(\"td\", {\"data-stat\": \"boxscore_word\"}).find(\"a\")\n",
-    "        if link is not None:\n",
-    "            game_url = url_base + link[\"href\"]\n",
-    "\n",
-    "            # send a request to the play-by-play page and get the HTML response\n",
-    "            game_response = requests.get(game_url)\n",
-    "            game_html = game_response.content\n",
-    "\n",
-    "            # parse the HTML using BeautifulSoup\n",
-    "            game_soup = BeautifulSoup(game_html, \"html.parser\")\n",
-    "\n",
-    "            # find the table that contains the play-by-play data\n",
-    "            pbp_table = game_soup.find(\"table\", {\"id\": \"pbp\"})\n",
-    "\n",
-    "            # extract the data from the table and write it to a CSV file\n",
-    "            with open(\"nfl_play_by_play_data_\" + str(year) + \".csv\", \"a\", newline=\"\") as f:\n",
-    "                writer = csv.writer(f)\n",
-    "                for pbp_row in pbp_table.find_all(\"tr\"):\n",
-    "                    # extract the data from each row of the play-by-play table\n",
-    "                    data = [td.get_text() for td in pbp_row.find_all(\"td\")]\n",
-    "                    writer.writerow(data)\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "23c6cb36",
-   "metadata": {
-    "code_folding": [
-     0
-    ],
-    "deletable": false,
-    "editable": false,
-    "hidden": true,
-    "run_control": {
-     "frozen": true
-    }
-   },
-   "outputs": [],
-   "source": [
-    "# chatgpt attempt 3\n",
-    "import requests\n",
-    "from bs4 import BeautifulSoup\n",
-    "import csv\n",
-    "\n",
-    "url_base = \"https://www.pro-football-reference.com\"\n",
-    "\n",
-    "# specify the year range you want to scrape data from\n",
-    "start_year = 2011\n",
-    "end_year = 2021\n",
-    "\n",
-    "# loop through all the years you want to scrape data from\n",
-    "for year in range(start_year, end_year+1):\n",
-    "\n",
-    "    # create the URL for the current year's play-by-play data page\n",
-    "    url = url_base + \"/years/\" + str(year) + \"/\"\n",
-    "\n",
-    "    # send a request to the URL and get the HTML response\n",
-    "    response = requests.get(url)\n",
-    "    html = response.content\n",
-    "\n",
-    "    # parse the HTML using BeautifulSoup\n",
-    "    soup = BeautifulSoup(html, \"html.parser\")\n",
-    "\n",
-    "    # find the table that contains the links to each game's play-by-play page\n",
-    "    table = soup.find(\"table\", {\"id\": \"games\"})\n",
-    "\n",
-    "    # loop through each row of the table, skipping the header row\n",
-    "    for row in table.find_all(\"tr\")[1:]:\n",
-    "\n",
-    "        # extract the link to the play-by-play page for the current game\n",
-    "        link = row.find(\"td\", {\"data-stat\": \"boxscore_word\"}).find(\"a\")\n",
-    "        if link is not None:\n",
-    "            game_url = url_base + link[\"href\"]\n",
-    "\n",
-    "            # send a request to the play-by-play page and get the HTML response\n",
-    "            game_response = requests.get(game_url)\n",
-    "            game_html = game_response.content\n",
-    "\n",
-    "            # parse the HTML using BeautifulSoup\n",
-    "            game_soup = BeautifulSoup(game_html, \"html.parser\")\n",
-    "\n",
-    "            # find the table that contains the play-by-play data\n",
-    "            pbp_table = game_soup.find(\"table\", {\"id\": \"pbp\"})\n",
-    "\n",
-    "            # extract the data from the table and write it to a CSV file\n",
-    "            with open(\"nfl_play_by_play_data_\" + str(year) + \".csv\", \"a\", newline=\"\") as f:\n",
-    "                writer = csv.writer(f)\n",
-    "                for pbp_row in pbp_table.find_all(\"tr\"):\n",
-    "                    # extract the data from each row of the play-by-play table\n",
-    "                    data = [td.get_text() for td in pbp_row.find_all(\"td\")]\n",
-    "                    writer.writerow(data)\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "180c7213",
-   "metadata": {
-    "code_folding": [
-     0
-    ],
-    "deletable": false,
-    "editable": false,
-    "hidden": true,
-    "run_control": {
-     "frozen": true
-    }
-   },
-   "outputs": [],
-   "source": [
-    "# chatgpt attempt 4\n",
-    "import requests\n",
-    "from bs4 import BeautifulSoup\n",
-    "import csv\n",
-    "\n",
-    "url_base = \"https://www.pro-football-reference.com\"\n",
-    "\n",
-    "# specify the year range you want to scrape data from\n",
-    "start_year = 2011\n",
-    "end_year = 2021\n",
-    "\n",
-    "# loop through all the years you want to scrape data from\n",
-    "for year in range(start_year, end_year+1):\n",
-    "\n",
-    "    # create the URL for the current year's play-by-play data page\n",
-    "    url = url_base + \"/years/\" + str(year) + \"/\"\n",
-    "\n",
-    "    # send a request to the URL and get the HTML response\n",
-    "    response = requests.get(url)\n",
-    "    html = response.content\n",
-    "\n",
-    "    # parse the HTML using BeautifulSoup\n",
-    "    soup = BeautifulSoup(html, \"html.parser\")\n",
-    "\n",
-    "    # find the table that contains the links to each game's play-by-play page\n",
-    "    table = soup.find(\"table\", {\"id\": \"games\"})\n",
-    "\n",
-    "    # loop through each row of the table, skipping the header row\n",
-    "    for row in table.tbody.find_all(\"tr\"):\n",
-    "\n",
-    "        # extract the link to the play-by-play page for the current game\n",
-    "        link = row.find(\"td\", {\"data-stat\": \"boxscore_word\"}).find(\"a\")\n",
-    "        if link is not None:\n",
-    "            game_url = url_base + link[\"href\"]\n",
-    "\n",
-    "            # send a request to the play-by-play page and get the HTML response\n",
-    "            game_response = requests.get(game_url)\n",
-    "            game_html = game_response.content\n",
-    "\n",
-    "            # parse the HTML using BeautifulSoup\n",
-    "            game_soup = BeautifulSoup(game_html, \"html.parser\")\n",
-    "\n",
-    "            # find the table that contains the play-by-play data\n",
-    "            pbp_table = game_soup.find(\"table\", {\"id\": \"pbp\"})\n",
-    "\n",
-    "            # extract the data from the table and write it to a CSV file\n",
-    "            with open(\"nfl_play_by_play_data_\" + str(year) + \".csv\", \"a\", newline=\"\") as f:\n",
-    "                writer = csv.writer(f)\n",
-    "                for pbp_row in pbp_table.tbody.find_all(\"tr\"):\n",
-    "                    # extract the data from each row of the play-by-play table\n",
-    "                    data = [td.get_text() for td in pbp_row.find_all(\"td\")]\n",
-    "                    writer.writerow(data)\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "1ce84760",
-   "metadata": {
-    "code_folding": [
-     0
-    ],
-    "hidden": true
-   },
-   "outputs": [],
-   "source": [
-    "# chatgpt attempt 5\n",
-    "import requests\n",
-    "from bs4 import BeautifulSoup\n",
-    "import csv\n",
-    "\n",
-    "url_base = \"https://www.pro-football-reference.com\"\n",
-    "\n",
-    "# specify the year range you want to scrape data from\n",
-    "start_year = 2011\n",
-    "end_year = 2021\n",
-    "\n",
-    "# loop through all the years you want to scrape data from\n",
-    "for year in range(start_year, end_year+1):\n",
-    "\n",
-    "    # create the URL for the current year's play-by-play data page\n",
-    "    url = url_base + \"/years/\" + str(year) + \"/\"\n",
-    "\n",
-    "    # send a request to the URL and get the HTML response\n",
-    "    response = requests.get(url)\n",
-    "    html = response.content\n",
-    "\n",
-    "    # parse the HTML using BeautifulSoup\n",
-    "    soup = BeautifulSoup(html, \"html.parser\")\n",
-    "\n",
-    "    # find the table that contains the links to each game's play-by-play page\n",
-    "    table = soup.find(\"table\", {\"id\": \"games\"})\n",
-    "\n",
-    "    # loop through each row of the table, skipping the header row\n",
-    "    for row in table.find_all(\"tr\")[1:]:\n",
-    "\n",
-    "        # extract the link to the play-by-play page for the current game\n",
-    "        link = row.find(\"td\", {\"data-stat\": \"boxscore_word\"}).find(\"a\")\n",
-    "        if link is not None:\n",
-    "            game_url = url_base + link[\"href\"]\n",
-    "\n",
-    "            # send a request to the play-by-play page and get the HTML response\n",
-    "            game_response = requests.get(game_url)\n",
-    "            game_html = game_response.content\n",
-    "\n",
-    "            # parse the HTML using BeautifulSoup\n",
-    "            game_soup = BeautifulSoup(game_html, \"html.parser\")\n",
-    "\n",
-    "            # find the table that contains the play-by-play data\n",
-    "            pbp_table = game_soup.find(\"table\", {\"id\": \"pbp\"})\n",
-    "\n",
-    "            # extract the data from the table and write it to a CSV file\n",
-    "            with open(\"nfl_play_by_play_data_\" + str(year) + \".csv\", \"a\", newline=\"\") as f:\n",
-    "                writer = csv.writer(f)\n",
-    "                if pbp_table.tbody is None:\n",
-    "                    for pbp_row in pbp_table.find_all(\"tr\"):\n",
-    "                        # extract the data from each row of the play-by-play table\n",
-    "                        data = [td.get_text() for td in pbp_row.find_all(\"td\")]\n",
-    "                        writer.writerow(data)\n",
-    "                else:\n",
-    "                    for pbp_row in pbp_table.tbody.find_all(\"tr\"):\n",
-    "                        # extract the data from each row of the play-by-play table\n",
-    "                        data = [td.get_text() for td in pbp_row.find_all(\"td\")]\n",
-    "                        writer.writerow(data)\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "198fed82",
-   "metadata": {
-    "hidden": true,
-    "scrolled": true
-   },
-   "outputs": [],
-   "source": [
-    "import nflfastpy as nfl\n",
-    "\n",
-    "# specify the year range you want to scrape data from\n",
-    "start_year = 2011\n",
-    "end_year = 2021\n",
-    "\n",
-    "# loop through all the years you want to scrape data from\n",
-    "for year in range(start_year, end_year+1):\n",
-    "\n",
-    "    # use the nfl.load_pbp_data() function to load the play-by-play data for the current year\n",
-    "    pbp = nfl.load_pbp_data(year)\n",
-    "\n",
-    "    # write the data to a CSV file\n",
-    "    pbp.to_csv(\"nfl_play_by_play_data_\" + str(year) + \".csv\")\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "4de1e4f0",
-   "metadata": {
-    "hidden": true,
-    "scrolled": true
-   },
-   "outputs": [],
-   "source": [
-    "pip install pfr_scraper\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "22f7a293",
-   "metadata": {
-    "hidden": true
-   },
-   "outputs": [],
-   "source": [
-    "import pfr_scraper\n",
-    "\n",
-    "# specify the year range you want to scrape data from\n",
-    "start_year = 2011\n",
-    "end_year = 2021\n",
-    "\n",
-    "# loop through all the years you want to scrape data from\n",
-    "for year in range(start_year, end_year+1):\n",
-    "\n",
-    "    # use the pfr_scraper.get_pbp_data() function to load the play-by-play data for the current year\n",
-    "    pbp = pfr_scraper.get_pbp_data(year)\n",
-    "\n",
-    "    # write the data to a CSV file\n",
-    "    pbp.to_csv(\"nfl_play_by_play_data_\" + str(year) + \".csv\")\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "7b5f06c7",
-   "metadata": {
-    "hidden": true
-   },
+   "id": "87ccc7d9",
+   "metadata": {},
    "outputs": [],
    "source": []
   },
   {
-   "cell_type": "markdown",
-   "id": "7ec2a6fe",
-   "metadata": {},
-   "source": [
-    "## towards-data-science link\n",
-    "https://towardsdatascience.com/analyzing-and-plotting-nfl-data-with-nflfastpy-and-plotly-a170a09cad6"
-   ]
-  },
-  {
    "cell_type": "code",
    "execution_count": null,
-   "id": "7f2b8e73",
+   "id": "d95533bb",
    "metadata": {
-    "code_folding": [
-     0
-    ],
-    "deletable": false,
-    "editable": false
+    "code_folding": []
    },
    "outputs": [],
    "source": [
-    "# import packages (ex code)\n",
-    "import pandas as pd\n",
-    "import plotly.graph_objects as go\n",
-    "# load data\n",
-    "import nfl_data_py as nfl\n",
-    "\n",
+    "# (ex code)\n",
     "df_2021 = nfl.import_pbp_data([2021])\n",
     "df_players = nfl.import_rosters([2021])\n",
     "df_teams = nfl.import_team_desc()\n",
     "\n",
-    "# print columns\n",
-    "df_2021.columns\n",
-    "\n",
     "# filter to regular season\n",
     "df_2021 = df_2021[df_2021[\"season_type\"] == \"REG\"]\n",
-    "\n",
     "# remove two point attempts\n",
     "df_2021 = df_2021[df_2021[\"two_point_attempt\"] == False]\n",
-    "\n",
     "# filter to pass plays\n",
     "df_2021 = df_2021[df_2021[\"play_type\"] == \"pass\"]\n",
-    "\n",
     "# join with the roster table to get player names\n",
     "df_2021 = df_2021.merge(df_players[[\"player_id\", \"player_name\"]], left_on=\"passer_player_id\", right_on=\"player_id\")"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "99442c08",
-   "metadata": {
-    "code_folding": [],
-    "deletable": false,
-    "editable": false
-   },
-   "outputs": [],
-   "source": [
-    "# for each year, get nfl.import_pbp_data() on the year and put in dictionary ; 3-4 min to run\n",
-    "warnings.filterwarnings('ignore')\n",
-    "ystart = 2000 ; yend = 2022\n",
-    "years = np.linspace(ystart,yend, yend-ystart+1, dtype = int)\n",
-    "\n",
-    "yearly_dfs = {}\n",
-    "for y in years:\n",
-    "    yearly_dfs[ f\"data_{y}\" ] = {f\"pbp_{y}\" : nfl.import_pbp_data([y]),\n",
-    "                                 f\"players_{y}\" : nfl.import_rosters([y]),\n",
-    "                                 f\"teams_{y}\" : nfl.import_team_desc() } \n",
-    "warnings.filterwarnings('default')"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "125b90f3",
-   "metadata": {},
-   "outputs": [],
-   "source": []
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "752924bc",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "def create_save_dfs():\n",
-    "    ystart = 2000 ; yend = 2002\n",
-    "    years = np.linspace(ystart,yend, yend-ystart+1, dtype = int)\n",
-    "\n",
-    "    sp = r\"C:\\Users\\Rafal Adamczyk\\Documents\\portfolio projects\\(2)_NFL\"\n",
-    "    exdf = pd.DataFrame()    \n",
-    "    yearly_dfs = {}\n",
-    "    for y in years:\n",
-    "        # create savepath to specific year\n",
-    "        savepath = sp + \"\\\\\" + str(y)\n",
-    "#         yearly_dfs[ f\"data_{y}\" ] = {f\"pbp_{y}\" : nfl.import_pbp_data([y]),\n",
-    "#                                      f\"players_{y}\" : nfl.import_rosters([y]),\n",
-    "#                                      f\"teams_{y}\" : nfl.import_team_desc() } \n",
-    "        yearly_dfs[ f\"data_{y}\" ] = {f\"pbp_{y}\" : pd.DataFrame(columns = [\"A\"]),\n",
-    "                                     f\"players_{y}\" : nfl.import_rosters([y]),\n",
-    "                                     f\"teams_{y}\" : nfl.import_team_desc() }\n",
-    "\n",
-    "        save_to_path(yearly_dfs, savepath)\n",
-    "        \n",
-    "    warnings.filterwarnings('default')\n",
-    "    "
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "ed5bd42c",
-   "metadata": {
-    "code_folding": [
-     7
-    ],
-    "scrolled": true
-   },
-   "outputs": [],
-   "source": [
-    "def save_to_path(dict_y, savepath):\n",
-    "    # check if path exists and is a directory (folder)\n",
-    "    e = os.path.exists(savepath) ; f = os.path.isdir(savepath)\n",
-    "\n",
-    "    if (e) & (f):\n",
-    "        folder = savepath + \"\\\\\"\n",
-    "        print( folder )\n",
-    "        print(dict_y, type(y))\n",
-    "    # if proper folders don't exist, create them and rerun function to save dfs in there\n",
-    "    else :\n",
-    "        os.makedirs(savepath)\n",
-    "        return save_to_path(exdf, savepath)\n",
-    "\n",
-    "create_save_dfs()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "f8a98f7b",
-   "metadata": {
-    "deletable": false,
-    "editable": false,
-    "run_control": {
-     "frozen": true
-    }
-   },
-   "outputs": [],
-   "source": [
-    "#python program to check if a directory exists\n",
-    "p1 = r\"C:\\Users\\Rafal Adamczyk\\Documents\\portfolio projects\\(2)_NFL\\()nba_api.ipynb\"\n",
-    "p2 = r\"C:\\Users\\Rafal Adamczyk\\Documents\\portfolio projects\\(2)_NFL\\2022\"\n",
-    "# Check whether the specified path exists or not\n",
-    "p1e = os.path.exists(p1)\n",
-    "p1d = os.path.isdir(p1)\n",
-    "\n",
-    "p2e = os.path.exists(p2)\n",
-    "p2d = os.path.isdir(p2)\n",
-    "#printing if the path exists or not\n",
-    "print(p1e)\n",
-    "print(p1d)\n",
-    "print(p2e)\n",
-    "print(p2d)"
    ]
   }
  ],
