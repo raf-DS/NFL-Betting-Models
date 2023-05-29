@@ -3,7 +3,9 @@
   {
    "cell_type": "markdown",
    "id": "e0c77669",
-   "metadata": {},
+   "metadata": {
+    "heading_collapsed": true
+   },
    "source": [
     "### imports, general functions, save/read-in data"
    ]
@@ -13,7 +15,8 @@
    "execution_count": null,
    "id": "f1f050d3",
    "metadata": {
-    "code_folding": []
+    "code_folding": [],
+    "hidden": true
    },
    "outputs": [],
    "source": [
@@ -45,7 +48,8 @@
      0,
      7,
      17
-    ]
+    ],
+    "hidden": true
    },
    "outputs": [],
    "source": [
@@ -73,7 +77,9 @@
   {
    "cell_type": "markdown",
    "id": "9b5f3863",
-   "metadata": {},
+   "metadata": {
+    "heading_collapsed": true
+   },
    "source": [
     "### play-by-play ; disregard for now"
    ]
@@ -90,6 +96,7 @@
     ],
     "deletable": false,
     "editable": false,
+    "hidden": true,
     "run_control": {
      "frozen": true
     }
@@ -152,6 +159,7 @@
    "metadata": {
     "deletable": false,
     "editable": false,
+    "hidden": true,
     "run_control": {
      "frozen": true
     }
@@ -162,6 +170,18 @@
    ]
   },
   {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "dc87d9c4",
+   "metadata": {
+    "hidden": true
+   },
+   "outputs": [],
+   "source": [
+    "pd.set_option('display.max_columns', None)"
+   ]
+  },
+  {
    "cell_type": "markdown",
    "id": "3568037e",
    "metadata": {},
@@ -169,11 +189,57 @@
     "### player performance week-to-week per season\n",
     "Goals :\n",
     "Try to predict week n performance, try models such as week n-1 performance, week n-1 and week n-2, different weights etc.\n",
-    "Use current team's record as indication of \"confidence\"?\n",
-    "#### Important columns\n",
+    "Use current team's record as indication of \"confidence\"?"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b835af33",
+   "metadata": {},
+   "source": [
+    "#### qb columns\n",
     "posteam (team on offense)\n",
     "\n",
-    "desc (description of play)"
+    "desc (description of play)\n",
+    "play_type\n",
+    "yards_gained\n",
+    "pass_length\n",
+    "pass_location\n",
+    "yards_after_catch\n",
+    "incomplete_pass\n",
+    "interception\n",
+    "rush_attempt\n",
+    "pass_attempt\n",
+    "touchdown\n",
+    "pass_touchdown\n",
+    "rush_touchdown\n",
+    "return_touchdown\n",
+    "fumble\n",
+    "complete_pass\n",
+    "passer_player_id\n",
+    "passer_player_name\n",
+    "passing_yards\n",
+    "receiver_player_id\n",
+    "receiving_yards\n",
+    "drive_ended_with_score\n",
+    "roof\n",
+    "surface\n",
+    "game_stadium"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 60,
+   "id": "60fdc5b6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pass_col = ['play_type','yards_gained','pass_length','pass_location','yards_after_catch','incomplete_pass','interception',\n",
+    "            'rush_attempt','pass_attempt','touchdown','pass_touchdown','rush_touchdown','return_touchdown','fumble',\n",
+    "            'complete_pass','passer_player_id','passer_player_name','passing_yards','receiver_player_id','weather','sack',\n",
+    "            'receiving_yards','drive_ended_with_score','roof','surface','game_stadium','ydstogo','passer','passer_id',\n",
+    "            'defenders_in_box','fourth_down_failed','first_down','penalty','penalty_type','spread_line','total_line',\n",
+    "           'posteam']"
    ]
   },
   {
@@ -194,7 +260,10 @@
    "execution_count": null,
    "id": "a2db49a7",
    "metadata": {
-    "code_folding": []
+    "code_folding": [
+     0
+    ],
+    "scrolled": false
    },
    "outputs": [],
    "source": [
@@ -212,40 +281,77 @@
     "pbptemp = [col for col in pbp.columns if 'wpa' not in col]\n",
     "pbptemp = [col for col in pbptemp if 'epa' not in col]\n",
     "pbptemp = [col for col in pbptemp if 'vegas' not in col]\n",
+    "pbptemp = [col for col in pbptemp if not col.endswith('prob')]\n",
     "pbp = pbp[pbptemp]\n",
     "\n",
     "games2022 = dict(tuple(pbp.groupby('game_id')))\n",
     "\n",
     "# example game to look through\n",
     "pd.unique( pbp.game_id )[16]\n",
-    "games2022['2022_02_ARI_LV'].tail(1)\n",
-    "\n",
-    "for column in pbp.columns:\n",
-    "    print(column)"
+    "games2022['2022_02_ARI_LV'].tail(1)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 55,
    "id": "61bca5ba",
    "metadata": {
+    "code_folding": [],
     "scrolled": false
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n",
+      "2022\n",
+      "POST\n"
+     ]
+    }
+   ],
    "source": [
-    "for row in pbp.tail(50).iloc:\n",
+    "for row in pbp.tail(14).iloc:\n",
     "    # 300 column and dozens of NaN's ; remove all when trying to learn df\n",
     "    row = row.dropna()\n",
     "    # display neatly \n",
     "    row = pd.DataFrame(row).transpose()\n",
-    "    display( row )\n",
+    "#     display( row )\n",
+    "    print(row.season.values[0])\n",
+    "    print(row.season_type.values[0])\n",
+    "    \n",
     "#     print( red(row.posteam.values[0]) ,row.desc.values[0] )\n"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f8a6833f",
+   "id": "47b0e557",
    "metadata": {},
    "outputs": [],
    "source": []
