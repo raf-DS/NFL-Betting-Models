@@ -15,9 +15,7 @@
    "execution_count": null,
    "id": "f1f050d3",
    "metadata": {
-    "code_folding": [
-     1
-    ],
+    "code_folding": [],
     "deletable": false,
     "editable": false,
     "hidden": true
@@ -90,7 +88,8 @@
    "outputs": [],
    "source": [
     "pd.set_option('display.max_columns', 25)\n",
-    "pd.set_option('display.max_rows', 5)"
+    "pd.set_option('display.max_rows', 5)\n",
+    "warnings.filterwarnings(\"ignore\")"
    ]
   },
   {
@@ -134,6 +133,7 @@
    "id": "61c82f27",
    "metadata": {
     "code_folding": [
+     0,
      1,
      7,
      34
@@ -230,7 +230,7 @@
    "id": "3568037e",
    "metadata": {},
    "source": [
-    "### player performance week-to-week per season\n",
+    "### scrape player performance week-to-week per season\n",
     "Goals :\n",
     "Try to predict week n performance, try models such as week n-1 performance, week n-1 and week n-2, different weights etc.\n",
     "Use current team's record as indication of \"confidence\"?"
@@ -239,13 +239,41 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a2db49a7",
+   "id": "b02752fb",
    "metadata": {
     "code_folding": [
-     4
+     3
     ],
     "deletable": false,
     "editable": false
+   },
+   "outputs": [],
+   "source": [
+    "# read in pbp & players datasets\n",
+    "# read in 2022 data\n",
+    "directory_yr_b4 = r'C:\\Users\\Rafal Adamczyk\\Documents\\portfolio projects\\(2)_NFL\\2021\\\\'\n",
+    "for root, dirs, files in os.walk(directory_yr_b4):\n",
+    "    for data in files:\n",
+    "        if \"pbp\" in data:\n",
+    "            pbp = pd.read_csv(directory_yr_b4 + data)\n",
+    "        elif \"players\" in data:\n",
+    "            players = pd.read_csv(directory_yr_b4 + data)\n",
+    "        elif \"teams\" in data:\n",
+    "            teams = pd.read_csv(directory_yr_b4 + data)\n",
+    "# remove unnecessary columns\n",
+    "pbptemp_yr_b4 = [col for col in pbp.columns if 'wpa' not in col]\n",
+    "pbptemp_yr_b4 = [col for col in pbptemp_yr_b4 if 'epa' not in col]\n",
+    "pbptemp_yr_b4 = [col for col in pbptemp_yr_b4 if 'vegas' not in col]\n",
+    "pbptemp_yr_b4 = [col for col in pbptemp_yr_b4 if not col.endswith('prob')]\n",
+    "pbp_yr_b4 = pbp[pbptemp_yr_b4]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a2db49a7",
+   "metadata": {
+    "code_folding": []
    },
    "outputs": [],
    "source": [
@@ -265,9 +293,9 @@
     "pbptemp = [col for col in pbptemp if 'epa' not in col]\n",
     "pbptemp = [col for col in pbptemp if 'vegas' not in col]\n",
     "pbptemp = [col for col in pbptemp if not col.endswith('prob')]\n",
-    "pbp = pbp[pbptemp]\n",
+    "pbp_yr = pbp[pbptemp]\n",
     "\n",
-    "games2022 = dict(tuple(pbp.groupby('game_id')))\n",
+    "gamesyr = dict(tuple(pbp.groupby('game_id')))\n",
     "\n",
     "# pick example game to look through\n",
     "pd.unique( pbp.game_id )[16]"
@@ -275,228 +303,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 21,
+   "execution_count": null,
    "id": "46b2d17b",
    "metadata": {
     "code_folding": [
-     7
+     9
     ]
    },
-   "outputs": [
-    {
-     "data": {
-      "text/html": [
-       "<div>\n",
-       "<style scoped>\n",
-       "    .dataframe tbody tr th:only-of-type {\n",
-       "        vertical-align: middle;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe tbody tr th {\n",
-       "        vertical-align: top;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe thead th {\n",
-       "        text-align: right;\n",
-       "    }\n",
-       "</style>\n",
-       "<table border=\"1\" class=\"dataframe\">\n",
-       "  <thead>\n",
-       "    <tr style=\"text-align: right;\">\n",
-       "      <th></th>\n",
-       "      <th>player_id</th>\n",
-       "      <th>first_name</th>\n",
-       "      <th>last_name</th>\n",
-       "      <th>depth_chart_position</th>\n",
-       "      <th>years_exp</th>\n",
-       "    </tr>\n",
-       "  </thead>\n",
-       "  <tbody>\n",
-       "    <tr>\n",
-       "      <th>962</th>\n",
-       "      <td>00-0023459</td>\n",
-       "      <td>Aaron</td>\n",
-       "      <td>Rodgers</td>\n",
-       "      <td>QB</td>\n",
-       "      <td>17</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>1063</th>\n",
-       "      <td>00-0036991</td>\n",
-       "      <td>Amari</td>\n",
-       "      <td>Rodgers</td>\n",
-       "      <td>WR</td>\n",
-       "      <td>1</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>1077</th>\n",
-       "      <td>00-0036222</td>\n",
-       "      <td>Isaiah</td>\n",
-       "      <td>Rodgers</td>\n",
-       "      <td>CB</td>\n",
-       "      <td>2</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>1456</th>\n",
-       "      <td>00-0031384</td>\n",
-       "      <td>Richard</td>\n",
-       "      <td>Rodgers</td>\n",
-       "      <td>TE</td>\n",
-       "      <td>8</td>\n",
-       "    </tr>\n",
-       "  </tbody>\n",
-       "</table>\n",
-       "</div>"
-      ],
-      "text/plain": [
-       "       player_id first_name last_name depth_chart_position  years_exp\n",
-       "962   00-0023459      Aaron   Rodgers                   QB         17\n",
-       "1063  00-0036991      Amari   Rodgers                   WR          1\n",
-       "1077  00-0036222     Isaiah   Rodgers                   CB          2\n",
-       "1456  00-0031384    Richard   Rodgers                   TE          8"
-      ]
-     },
-     "metadata": {},
-     "output_type": "display_data"
-    },
-    {
-     "data": {
-      "text/html": [
-       "<div>\n",
-       "<style scoped>\n",
-       "    .dataframe tbody tr th:only-of-type {\n",
-       "        vertical-align: middle;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe tbody tr th {\n",
-       "        vertical-align: top;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe thead th {\n",
-       "        text-align: right;\n",
-       "    }\n",
-       "</style>\n",
-       "<table border=\"1\" class=\"dataframe\">\n",
-       "  <thead>\n",
-       "    <tr style=\"text-align: right;\">\n",
-       "      <th></th>\n",
-       "      <th>player_id</th>\n",
-       "      <th>first_name</th>\n",
-       "      <th>last_name</th>\n",
-       "      <th>depth_chart_position</th>\n",
-       "      <th>years_exp</th>\n",
-       "    </tr>\n",
-       "  </thead>\n",
-       "  <tbody>\n",
-       "    <tr>\n",
-       "      <th>1270</th>\n",
-       "      <td>00-0033873</td>\n",
-       "      <td>Patrick</td>\n",
-       "      <td>Mahomes</td>\n",
-       "      <td>QB</td>\n",
-       "      <td>5</td>\n",
-       "    </tr>\n",
-       "  </tbody>\n",
-       "</table>\n",
-       "</div>"
-      ],
-      "text/plain": [
-       "       player_id first_name last_name depth_chart_position  years_exp\n",
-       "1270  00-0033873    Patrick   Mahomes                   QB          5"
-      ]
-     },
-     "metadata": {},
-     "output_type": "display_data"
-    },
-    {
-     "data": {
-      "text/html": [
-       "<div>\n",
-       "<style scoped>\n",
-       "    .dataframe tbody tr th:only-of-type {\n",
-       "        vertical-align: middle;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe tbody tr th {\n",
-       "        vertical-align: top;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe thead th {\n",
-       "        text-align: right;\n",
-       "    }\n",
-       "</style>\n",
-       "<table border=\"1\" class=\"dataframe\">\n",
-       "  <thead>\n",
-       "    <tr style=\"text-align: right;\">\n",
-       "      <th></th>\n",
-       "      <th>player_id</th>\n",
-       "      <th>first_name</th>\n",
-       "      <th>last_name</th>\n",
-       "      <th>depth_chart_position</th>\n",
-       "      <th>years_exp</th>\n",
-       "    </tr>\n",
-       "  </thead>\n",
-       "  <tbody>\n",
-       "    <tr>\n",
-       "      <th>18</th>\n",
-       "      <td>00-0035248</td>\n",
-       "      <td>Zachary</td>\n",
-       "      <td>Allen</td>\n",
-       "      <td>DE</td>\n",
-       "      <td>3</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>311</th>\n",
-       "      <td>00-0034857</td>\n",
-       "      <td>Joshua</td>\n",
-       "      <td>Allen</td>\n",
-       "      <td>QB</td>\n",
-       "      <td>4</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>...</th>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2160</th>\n",
-       "      <td>00-0034335</td>\n",
-       "      <td>Marcus</td>\n",
-       "      <td>Allen</td>\n",
-       "      <td>ILB</td>\n",
-       "      <td>4</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2561</th>\n",
-       "      <td>00-0033523</td>\n",
-       "      <td>Jonathan</td>\n",
-       "      <td>Allen</td>\n",
-       "      <td>DT</td>\n",
-       "      <td>5</td>\n",
-       "    </tr>\n",
-       "  </tbody>\n",
-       "</table>\n",
-       "<p>14 rows × 5 columns</p>\n",
-       "</div>"
-      ],
-      "text/plain": [
-       "       player_id first_name last_name depth_chart_position  years_exp\n",
-       "18    00-0035248    Zachary     Allen                   DE          3\n",
-       "311   00-0034857     Joshua     Allen                   QB          4\n",
-       "...          ...        ...       ...                  ...        ...\n",
-       "2160  00-0034335     Marcus     Allen                  ILB          4\n",
-       "2561  00-0033523   Jonathan     Allen                   DT          5\n",
-       "\n",
-       "[14 rows x 5 columns]"
-      ]
-     },
-     "metadata": {},
-     "output_type": "display_data"
-    }
-   ],
+   "outputs": [],
    "source": [
     "# get relevant player data\n",
     "# subset for relevant columns\n",
@@ -525,72 +339,98 @@
    "id": "47ec70c2",
    "metadata": {},
    "source": [
-    "#### https://www.espn.com/nfl/player/gamelog/_/id/8439/aaron-rodgers \n",
-    "##### AARON RODGERS ESPN STATS ; MIMIC TO ENSURE WORKING\n"
+    "### https://www.espn.com/nfl/player/gamelog/_/id/8439/aaron-rodgers \n",
+    "##### get QB stats to mimic ESPN's stats ; working (95% ; some weeks have +-1 completion in comparison to ESPN)\n",
+    "##### for year y (2022), get year y-1's (2021) average per season\n",
+    "##### for year y (2022), get year y-1's (2021) averages against the same team last year\n"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
-   "id": "8833cd18",
+   "execution_count": 45,
+   "id": "e69e0932",
    "metadata": {
-    "code_folding": [],
-    "collapsed": true
+    "code_folding": [
+     13,
+     16
+    ]
    },
    "outputs": [
     {
-     "name": "stdout",
+     "name": "stderr",
      "output_type": "stream",
      "text": [
-      "first_down_rush\n",
-      "rush_attempt\n",
-      "rush_touchdown\n",
-      "lateral_rush\n",
-      "rusher_player_id\n",
-      "rusher_player_name\n",
-      "rushing_yards\n",
-      "lateral_rusher_player_id\n",
-      "lateral_rusher_player_name\n",
-      "lateral_rushing_yards\n",
-      "rusher\n",
-      "rusher_jersey_number\n",
-      "rush\n",
-      "rusher_id\n",
-      "number_of_pass_rushers\n"
+      "\n",
+      "KeyboardInterrupt\n",
+      "\n"
      ]
     }
    ],
    "source": [
-    "# try to find relevant columns\n",
-    "for col in pbp.columns:\n",
-    "    if 'rush' in (col):\n",
-    "        print(col)"
+    "# def data_per_year(first, last):    \n",
+    "# input first : (int) the first year to begin tracking data from (track first-1 to have previous year's averages)\n",
+    "# input last : (int) the last year to begin tracking data to\n",
+    "# output yearlydfs : (dict) with key=year, values=dfs\n",
+    "def data_per_year(first = 2016, last = 2022):\n",
+    "    function_name = sys._getframe().f_code.co_name ;\n",
+    "    try : \n",
+    "        yrs = np.linspace(first-1, last, last-first+1, dtype = int)\n",
+    "        yearlydfs = {}\n",
+    "        # populate yearlydfs by reading in files and cleaning pbp file\n",
+    "        for yr in yrs :\n",
+    "            directory = r'C:\\Users\\Rafal Adamczyk\\Documents\\portfolio projects\\(2)_NFL\\\\' + f'{yr}' + r'\\\\'\n",
+    "            # loop through file explorer saved files (took an hour to save all originally)\n",
+    "            for root, dirs, files in os.walk(directory):\n",
+    "                # read in files\n",
+    "                for data in files:\n",
+    "                    if \"pbp\" in data:\n",
+    "                        pbp = pd.read_csv(directory + data)\n",
+    "                    elif \"players\" in data:\n",
+    "                        players = pd.read_csv(directory + data)\n",
+    "                    elif \"teams\" in data:\n",
+    "                        teams = pd.read_csv(directory + data)\n",
+    "            # remove unnecessary columns from pbp\n",
+    "            pbptemp = [col for col in pbp.columns if 'wpa' not in col]\n",
+    "            pbptemp = [col for col in pbptemp if 'epa' not in col]\n",
+    "            pbptemp = [col for col in pbptemp if 'vegas' not in col]\n",
+    "            pbptemp = [col for col in pbptemp if not col.endswith('prob')]\n",
+    "            pbp_yr = pbp[pbptemp]\n",
+    "            # populate dictionary\n",
+    "            yearlydfs[yr] = [pbp , players , teams]  \n",
+    "        return yearlydfs\n",
+    "    except Exception as e: \n",
+    "        exc_type, exc_obj, exc_tb = sys.exc_info()\n",
+    "        print(f'Error in {blue(function_name)} ; throws\\n{red(e)} on line {exc_tb.tb_lineno}')\n",
+    "yearlydfs = data_per_year()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
+   "execution_count": null,
    "id": "e61d8983",
    "metadata": {
     "code_folding": [
-     3,
+     0,
      5
     ],
+    "deletable": false,
+    "editable": false,
     "scrolled": false
    },
    "outputs": [],
    "source": [
-    "# def filter_by_player(df,pid):\n",
+    "# def filter_by_player(df, pid, pos_col): output pid_plays\n",
     "# input df : (pd.df) df pf yearly pbp data to filter through\n",
     "# input pid : (str) player_id\n",
-    "def filter_by_player(df, pid, pass_col):\n",
+    "# input pos_col : (list) pass_col, rec_col, kick_col, etc.\n",
+    "# output pid_plays : (pd.df) all plays where inputted pid is involved\n",
+    "def filter_by_player(df, pid, pos_col):\n",
     "    function_name = sys._getframe().f_code.co_name ;\n",
     "    try : \n",
     "        # get rows where inputted df has the player's id 'pid' in a column/row element\n",
     "        pid_plays = df[df.apply(lambda x: any(value == pid for value in x.values), axis=1)]\n",
     "        # prepare df with summary of stats for pid for each week of season x\n",
-    "        pid_byweek = pd.DataFrame(columns = ['cmp', 'patt', 'pyds', 'ptd', 'int', 'sack', 'rating', 'ratt', 'ryds', 'rtd'])\n",
-    "    #     rel_weeks = np.linspace(1,np.max(pid_plays.week),np.max(pid_plays.week), dtype=int)\n",
+    "        pid_byweek = pd.DataFrame(columns = pos_col)\n",
     "        return pid_plays\n",
     "    except Exception as e: \n",
     "        exc_type, exc_obj, exc_tb = sys.exc_info()\n",
@@ -599,57 +439,47 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 33,
+   "execution_count": null,
+   "id": "eefb85f8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# aaron rodgers            \n",
+    "pid_plays = filter_by_player(pbp_yr, '00-0023459', pass_col)\n",
+    "# mahomes            \n",
+    "# pid_plays = filter_by_player(pbp,'00-0033873',pass_col)\n",
+    "# josh allen           \n",
+    "# pid_plays = filter_by_player(pbp,'00-0034857',pass_col)\n",
+    "\n",
+    "# get week-to-week stats\n",
+    "player_weekbyweek( pid_plays , pass_col )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
    "id": "be69bdb2",
    "metadata": {
     "code_folding": [
      6
-    ]
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "\u001b[31m18\u001b[0m\n",
-      "ESPN cmp : 19.0\n",
-      "ESPN att : 33.0\n",
-      "ESPN yds : 254.0\n",
-      "ESPN cmp% : 57.57575757575758\n",
-      "ESPN avg : 7.696969696969697\n",
-      "ESPN td (pass): 3.0\n",
-      "ESPN int : 1.0\n",
-      "ESPN lng : 49.0\n",
-      "ESPN sack : 2.0\n",
-      "ESPN car : 9.0\n",
-      "ESPN yds (rush) : 16.0\n",
-      "ESPN avg (rush) : 1.7777777777777777\n",
-      "ESPN td (rush) : 0.0\n",
-      "ESPN lng (rush) : 7.0\n",
-      "\u001b[31m17\u001b[0m\n",
-      "Error in \u001b[34mfilter_by_player_2\u001b[0m ; throws\n",
-      "\u001b[31mzero-size array to reduction operation maximum which has no identity\u001b[0m on line 20\n",
-      "STILL RAN THO\n"
-     ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "C:\\Users\\Rafal Adamczyk\\AppData\\Local\\Temp\\ipykernel_9220\\3423355404.py:16: RuntimeWarning: invalid value encountered in double_scalars\n",
-      "  cmp_pct = cmp/patt*100 #DIFFERENT\n",
-      "C:\\Users\\Rafal Adamczyk\\AppData\\Local\\Temp\\ipykernel_9220\\3423355404.py:17: RuntimeWarning: invalid value encountered in double_scalars\n",
-      "  pavg = pyrd/patt #DIFFERENT\n"
-     ]
+    ],
+    "deletable": false,
+    "editable": false,
+    "run_control": {
+     "frozen": true
     }
-   ],
+   },
+   "outputs": [],
    "source": [
-    "def filter_by_player_2(pid_plays, pass_col):\n",
+    "# def player_weekbyweek(pid_plays, pass_col):\n",
+    "# input pid_plays : (pd.df) filter_by_player() output\n",
+    "# inputs pass_col : (list) list of columns relevant to QB\n",
+    "# def player_weekbyweek(pid_plays, pass_col):\n",
+    "def player_weekbyweek(pid_plays, pass_col):\n",
     "    function_name = sys._getframe().f_code.co_name ;\n",
     "    try : \n",
     "        # get list of weeks where player played\n",
-    "        rel_weeks = [18,17] # set to last 2 weeks for convenience\n",
-    "#         rel_weeks = [17]\n",
+    "        rel_weeks = np.linspace(1,np.max(pid_plays.week),np.max(pid_plays.week), dtype=int)\n",
     "        for w in rel_weeks:\n",
     "            # get all plays involving player on week w\n",
     "            pid_week = pid_plays[pid_plays.week == w]\n",
@@ -690,7 +520,96 @@
     "            print( f'ESPN avg (rush) : {ravg}' )\n",
     "            print( f'ESPN td (rush) : {rtd}' )\n",
     "            print( f'ESPN lng (rush) : {rlng}' )\n",
-    "            \n",
+    "    except Exception as e: \n",
+    "        exc_type, exc_obj, exc_tb = sys.exc_info()\n",
+    "        cmp = np.nan ; patt = np.nan ; pyrd = np.nan ; cmp_pct = np.nan ; pavg = np.nan;\n",
+    "        ptd = np.nan ; interception = np.nan ; plng = np.nan ; sack = np.nan ; ratt = np.nan;\n",
+    "        ryrd = np.nan ; ravg = np.nan ; rtd = np.nan ; rlng = np.nan ;\n",
+    "        print(f'Error in {blue(function_name)} ; throws\\n{red(e)} on line {exc_tb.tb_lineno}')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "57967f49",
+   "metadata": {
+    "code_folding": [
+     0,
+     4,
+     11
+    ],
+    "deletable": false,
+    "editable": false,
+    "run_control": {
+     "frozen": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# def player_seasonly_avg(yearlydfs, pid, pos_col):\n",
+    "# input pid_plays : (pd.df) filter_by_player() output\n",
+    "# input pid : (str) player_id\n",
+    "# input pos_col : (list) pass_col, rec_col, kick_col, etc.\n",
+    "def player_seasonly_avg(yearlydfs, pid, pos_col):\n",
+    "    function_name = sys._getframe().f_code.co_name ;\n",
+    "    try :         \n",
+    "        # read in pbp & players datasets\n",
+    "        # read in 2022 data\n",
+    "\n",
+    "\n",
+    "    except Exception as e: \n",
+    "        exc_type, exc_obj, exc_tb = sys.exc_info()\n",
+    "        print(f'Error in {blue(function_name)} ; throws\\n{red(e)} on line {exc_tb.tb_lineno}')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c6a429d5",
+   "metadata": {
+    "code_folding": [
+     0,
+     4,
+     7,
+     28
+    ],
+    "deletable": false,
+    "editable": false,
+    "run_control": {
+     "frozen": true
+    },
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "# def create_player_season_avg(pid_plays, pass_col):\n",
+    "# input pid_plays : (pd.df) filter_by_player() output\n",
+    "# inputs pass_col : (list) list of columns relevant to QB\n",
+    "# def player_weekbyweek(pid_plays, pass_col):\n",
+    "def create_player_season_avg(pid_plays, pass_col):\n",
+    "    function_name = sys._getframe().f_code.co_name ;\n",
+    "    \n",
+    "    try : \n",
+    "        # sum stats over weeks played\n",
+    "        # get same stats as ESPN website\n",
+    "        cmp = np.sum(pid_plays.complete_pass) #GOOD\n",
+    "        patt = np.sum(pid_plays.pass_attempt.values) #DIFFERENT\n",
+    "        pyrd = np.sum(pid_plays.passing_yards.fillna(0).values) #GOOD\n",
+    "        cmp_pct = cmp/patt*100 #DIFFERENT\n",
+    "        pavg = pyrd/patt #DIFFERENT\n",
+    "        ptd = np.sum(pid_plays.pass_touchdown.values) #GOOD\n",
+    "        interception = np.sum(pid_plays.interception.values) #GOOD\n",
+    "        plng = np.max(pid_plays.passing_yards.fillna(0).values) #GOOD\n",
+    "        sack = np.sum(pid_plays.sack.fillna(0).values) #GOOD\n",
+    "        ratt = np.sum(pid_plays.rush_attempt.values) #GOOD\n",
+    "        ryrd = np.sum(pid_plays.rushing_yards.fillna(0).values) #GOOD\n",
+    "        ravg = ryrd/ratt #DIFFERENT\n",
+    "        rtd = np.sum(pid_plays.rush_touchdown.values) #GOOD\n",
+    "        rlng = np.max(pid_plays.rushing_yards.fillna(0).values) #GOOD\n",
+    "        # get yards gained            \n",
+    "        yg = np.sum( np.abs(pid_plays.yards_gained.values) )\n",
+    "        # replace nans with 0's to sum properly ; YAC relevant to receivers, not QB necessarily\n",
+    "        yac = np.sum(pid_plays.yards_after_catch.fillna(0).values)\n",
     "    except Exception as e: \n",
     "        exc_type, exc_obj, exc_tb = sys.exc_info()\n",
     "        cmp = np.nan ; patt = np.nan ; pyrd = np.nan ; cmp_pct = np.nan ; pavg = np.nan;\n",
@@ -699,15 +618,12 @@
     "        print(f'Error in {blue(function_name)} ; throws\\n{red(e)} on line {exc_tb.tb_lineno}')\n",
     "            \n",
     "# aaron rodgers            \n",
-    "# pid_plays = filter_by_player(pbp,'00-0023459',pass_col)\n",
-    "# mahomes            \n",
-    "# pid_plays = filter_by_player(pbp,'00-0033873',pass_col)\n",
-    "# josh allen           \n",
-    "# pid_plays = filter_by_player(pbp,'00-0034857',pass_col)\n",
+    "# pid_plays = filter_by_player(pbp_yr, '00-0023459', pass_col)\n",
+    "# pid_plays_yr_b4 = filter_by_player(pbp_yr, '00-0023459', pass_col)\n",
     "\n",
     "# filter_by_player(pbp,'00-0036222',pass_col) \n",
     "# ex1 with Aaron Rodgers ; ex2 with Isaiah Rodgers\n",
-    "filter_by_player_2( pid_plays , pass_col )\n"
+    "# player_season_avg( pid_plays_yr_b4 , pass_col )\n"
    ]
   },
   {
