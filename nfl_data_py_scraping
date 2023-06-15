@@ -124,7 +124,7 @@
     "heading_collapsed": true
    },
    "source": [
-    "### play-by-play ; disregard for now"
+    "### read in & save play-by-play ; only necessary to run once"
    ]
   },
   {
@@ -214,18 +214,6 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "dc87d9c4",
-   "metadata": {
-    "hidden": true
-   },
-   "outputs": [],
-   "source": [
-    "pd.set_option('display.max_columns', None)"
-   ]
-  },
-  {
    "cell_type": "markdown",
    "id": "3568037e",
    "metadata": {},
@@ -239,66 +227,11 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b02752fb",
-   "metadata": {
-    "code_folding": [
-     3
-    ],
-    "deletable": false,
-    "editable": false
-   },
+   "id": "81f9836c",
+   "metadata": {},
    "outputs": [],
    "source": [
-    "# read in pbp & players datasets\n",
-    "# read in 2022 data\n",
-    "directory_yr_b4 = r'C:\\Users\\Rafal Adamczyk\\Documents\\portfolio projects\\(2)_NFL\\2021\\\\'\n",
-    "for root, dirs, files in os.walk(directory_yr_b4):\n",
-    "    for data in files:\n",
-    "        if \"pbp\" in data:\n",
-    "            pbp = pd.read_csv(directory_yr_b4 + data)\n",
-    "        elif \"players\" in data:\n",
-    "            players = pd.read_csv(directory_yr_b4 + data)\n",
-    "        elif \"teams\" in data:\n",
-    "            teams = pd.read_csv(directory_yr_b4 + data)\n",
-    "# remove unnecessary columns\n",
-    "pbptemp_yr_b4 = [col for col in pbp.columns if 'wpa' not in col]\n",
-    "pbptemp_yr_b4 = [col for col in pbptemp_yr_b4 if 'epa' not in col]\n",
-    "pbptemp_yr_b4 = [col for col in pbptemp_yr_b4 if 'vegas' not in col]\n",
-    "pbptemp_yr_b4 = [col for col in pbptemp_yr_b4 if not col.endswith('prob')]\n",
-    "pbp_yr_b4 = pbp[pbptemp_yr_b4]"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "a2db49a7",
-   "metadata": {
-    "code_folding": []
-   },
-   "outputs": [],
-   "source": [
-    "# read in pbp & players datasets\n",
-    "# read in 2022 data\n",
-    "directory = r'C:\\Users\\Rafal Adamczyk\\Documents\\portfolio projects\\(2)_NFL\\2022\\\\'\n",
-    "for root, dirs, files in os.walk(directory):\n",
-    "    for data in files:\n",
-    "        if \"pbp\" in data:\n",
-    "            pbp = pd.read_csv(directory + data)\n",
-    "        elif \"players\" in data:\n",
-    "            players = pd.read_csv(directory + data)\n",
-    "        elif \"teams\" in data:\n",
-    "            teams = pd.read_csv(directory + data)\n",
-    "# remove unnecessary columns\n",
-    "pbptemp = [col for col in pbp.columns if 'wpa' not in col]\n",
-    "pbptemp = [col for col in pbptemp if 'epa' not in col]\n",
-    "pbptemp = [col for col in pbptemp if 'vegas' not in col]\n",
-    "pbptemp = [col for col in pbptemp if not col.endswith('prob')]\n",
-    "pbp_yr = pbp[pbptemp]\n",
-    "\n",
-    "gamesyr = dict(tuple(pbp.groupby('game_id')))\n",
-    "\n",
-    "# pick example game to look through\n",
-    "pd.unique( pbp.game_id )[16]"
+    "pd.set_option('display.max_columns', 20)"
    ]
   },
   {
@@ -307,20 +240,14 @@
    "id": "46b2d17b",
    "metadata": {
     "code_folding": [
-     9
-    ]
+     1
+    ],
+    "deletable": false,
+    "editable": false
    },
    "outputs": [],
    "source": [
-    "# get relevant player data\n",
-    "# subset for relevant columns\n",
-    "playcols = ['player_id','first_name','last_name','depth_chart_position','years_exp']\n",
-    "players = players[playcols]\n",
-    "# manipulate for abbreviated name\n",
-    "display(players[players.last_name == 'Rodgers'])\n",
-    "display(players[players.last_name == 'Mahomes'])\n",
-    "display(players[players.last_name == 'Allen'])\n",
-    "\n",
+    "# set up pos_col\n",
     "pass_col = ['play_type','yards_gained','pass_length','pass_location','yards_after_catch','incomplete_pass',\n",
     "            'interception','rush_attempt','pass_attempt','touchdown','pass_touchdown','rush_touchdown',\n",
     "            'return_touchdown','fumble','complete_pass','passer_player_id','passer_player_name','passing_yards',\n",
@@ -330,42 +257,22 @@
     "            'home_opening_kickoff','first_down_rush','rush_attempt','rush_touchdown','lateral_rush',\n",
     "            'rusher_player_id','rusher_player_name','rushing_yards','lateral_rusher_player_id',\n",
     "            'lateral_rusher_player_name','lateral_rushing_yards','rusher','rusher_jersey_number',\n",
-    "            'rush','rusher_id','number_of_pass_rushers', 'pass_oe']\n",
-    "# etc."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "id": "47ec70c2",
-   "metadata": {},
-   "source": [
-    "### https://www.espn.com/nfl/player/gamelog/_/id/8439/aaron-rodgers \n",
-    "##### get QB stats to mimic ESPN's stats ; working (95% ; some weeks have +-1 completion in comparison to ESPN)\n",
-    "##### for year y (2022), get year y-1's (2021) average per season\n",
-    "##### for year y (2022), get year y-1's (2021) averages against the same team last year\n"
+    "            'rush','rusher_id','number_of_pass_rushers', 'pass_oe']\n"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 45,
-   "id": "e69e0932",
+   "execution_count": null,
+   "id": "712d5187",
    "metadata": {
     "code_folding": [
-     13,
-     16
-    ]
+     4,
+     6
+    ],
+    "deletable": false,
+    "editable": false
    },
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "\n",
-      "KeyboardInterrupt\n",
-      "\n"
-     ]
-    }
-   ],
+   "outputs": [],
    "source": [
     "# def data_per_year(first, last):    \n",
     "# input first : (int) the first year to begin tracking data from (track first-1 to have previous year's averages)\n",
@@ -374,7 +281,7 @@
     "def data_per_year(first = 2016, last = 2022):\n",
     "    function_name = sys._getframe().f_code.co_name ;\n",
     "    try : \n",
-    "        yrs = np.linspace(first-1, last, last-first+1, dtype = int)\n",
+    "        yrs = np.linspace(first-1, last, last-first+2, dtype = int)\n",
     "        yearlydfs = {}\n",
     "        # populate yearlydfs by reading in files and cleaning pbp file\n",
     "        for yr in yrs :\n",
@@ -405,14 +312,22 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "id": "47ec70c2",
+   "metadata": {},
+   "source": [
+    "### https://www.espn.com/nfl/player/gamelog/_/id/8439/aaron-rodgers \n",
+    "##### get QB stats to mimic ESPN's stats ; working (95% ; some weeks have +-1 completion in comparison to ESPN)\n",
+    "##### for year y (2022), get year y-1's (2021) average per season\n",
+    "##### for year y (2022), get year y-1's (2021) averages against the same team last year\n"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": null,
    "id": "e61d8983",
    "metadata": {
-    "code_folding": [
-     0,
-     5
-    ],
+    "code_folding": [],
     "deletable": false,
     "editable": false,
     "scrolled": false
@@ -440,17 +355,30 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "eefb85f8",
+   "id": "5d73b534",
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "# for each year, get seasonly data on player & week-by-week\n",
+    "for key, values in yearlydfs.items():\n",
+    "    if key > 2021:\n",
+    "        print(key)\n",
+    "        display( yearlydfs[key-1][0].head(1) )\n",
+    "        display( yearlydfs[key][0].head(1) )"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a9276a2e",
    "metadata": {},
    "outputs": [],
    "source": [
-    "# aaron rodgers            \n",
-    "pid_plays = filter_by_player(pbp_yr, '00-0023459', pass_col)\n",
-    "# mahomes            \n",
-    "# pid_plays = filter_by_player(pbp,'00-0033873',pass_col)\n",
-    "# josh allen           \n",
-    "# pid_plays = filter_by_player(pbp,'00-0034857',pass_col)\n",
-    "\n",
+    "pid_plays = filter_by_player(pbp_yr, '00-0023459', pass_col) # aaron rodgers            \n",
+    "# pid_plays = filter_by_player(pbp_yr, '00-0033873', pass_col) # mahomes            \n",
+    "# pid_plays = filter_by_player(pbp_yr, '00-0034857', pass_col) # josh allen           \n",
     "# get week-to-week stats\n",
     "player_weekbyweek( pid_plays , pass_col )"
    ]
@@ -461,13 +389,10 @@
    "id": "be69bdb2",
    "metadata": {
     "code_folding": [
-     6
+     49
     ],
     "deletable": false,
-    "editable": false,
-    "run_control": {
-     "frozen": true
-    }
+    "editable": false
    },
    "outputs": [],
    "source": [
@@ -531,7 +456,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "57967f49",
+   "id": "af82c60d",
    "metadata": {
     "code_folding": [
      0,
@@ -565,7 +490,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c6a429d5",
+   "id": "de98c5d1",
    "metadata": {
     "code_folding": [
      0,
@@ -648,6 +573,14 @@
     "#     row = pd.DataFrame(row).transpose()\n",
     "#     display(row)"
    ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d06c2f59",
+   "metadata": {},
+   "outputs": [],
+   "source": []
   }
  ],
  "metadata": {
